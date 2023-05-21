@@ -1,0 +1,40 @@
+const { Router } = require("express");
+const router = Router();
+const Assistant = require("../models/AssistantSchema");
+const Article = require("../models/ArticleSchema");
+const assistant = require("../util/assistant");
+
+// Obtener respuesta de prueba
+router.get("/", async (req, res) => {
+  const { articleID } = req.body;
+
+  try {
+    // Obtener el artículo de la base de datos con ese id
+    const article = await Article.findById(articleID);
+    if (!article) {
+      // Manejar el caso en el que no se encuentre el artículo
+      return res.status(404).json({ message: "El artículo no existe" });
+    }
+
+    // Rescatar el abstract si está presente en el artículo
+    const abstract = article.abstract || "";
+
+    // Enviar el abstract al asistente
+    const [abstractOpinion, themeOpinion] = await assistant.getAbstractOpinion(
+      abstract
+    );
+
+    res.json({
+      abstractOpinionResponse: abstractOpinion,
+      themeOpinionResponse: themeOpinion,
+    });
+  } catch (error) {
+    // Manejar errores de base de datos u otras excepciones
+    res
+      .status(500)
+      .json({ message: "Error al obtener la respuesta", error: error.message });
+  }
+});
+
+//Exportar modulo
+module.exports = router;

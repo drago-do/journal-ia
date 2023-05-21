@@ -48,6 +48,7 @@ app.use(require("./routes/index"));
 app.use("/article", require("./routes/article"));
 app.use("/user", require("./routes/user"));
 app.use("/pdf", require("./routes/pdf"));
+app.use("/assistant", require("./routes/assistant"));
 
 //Iniciando el servidor
 app.listen(app.get("port"), () => {
