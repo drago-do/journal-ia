@@ -3,6 +3,7 @@ const router = Router();
 const Assistant = require("../models/AssistantSchema");
 const Article = require("../models/ArticleSchema");
 const assistant = require("../util/assistant");
+const parsePDF = require("./../util/transcript");
 
 // Obtener respuesta de prueba
 router.get("/", async (req, res) => {
@@ -33,6 +34,17 @@ router.get("/", async (req, res) => {
     res
       .status(500)
       .json({ message: "Error al obtener la respuesta", error: error.message });
+  }
+});
+
+//Obtener transcripción del pdf
+router.get("/transcript/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    const transcript = await parsePDF.getTranscriptPDF(id);
+    res.status(200).json({ success: true, data: transcript });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
