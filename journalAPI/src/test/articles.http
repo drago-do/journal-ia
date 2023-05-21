@@ -1,0 +1,30 @@
+###
+POST http://localhost:3001/article HTTP/1.1
+Content-Type: application/json
+
+{
+  "title": "Test Article 3",
+  "abstract": "This is a test article Reprehenderit ullamco laboris labore est nostrud incididunt commodo cillum nulla culpa elit aliquip dolor. Lorem reprehenderit qui aute esse officia aliquip. Nulla proident velit quis tempor mollit. Irure sit cupidatat commodo esse dolore velit aliqua non dolor. Consequat dolor irure laboris in occaecat nulla anim aliqua.",
+  "author": "64692706b73613ca060b7950",
+  "category": "Turismo"
+}
+
+###
+GET http://localhost:3001/article   HTTP/1.1
+
+
+###
+GET http://localhost:3001/article/6451c6109266427ccb15619a HTTP/1.1
+
+
+###
+PUT http://localhost:3001/article/6451c6439266427ccb1561a0 HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "alejo"
+}
+
+
+###
+DELETE  http://localhost:3001/article/6451c6439266427ccb1561a0  HTTP/1.1
