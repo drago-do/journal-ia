@@ -18,7 +18,7 @@ const AssistantSchema = new Schema({
     required: true,
   },
   general_opinion: { type: String, required: true },
-  specific_opinion: { type: [String] },
+  specific_opinion: { type: [[String]] },
   final_eval: { type: String },
 });
 
