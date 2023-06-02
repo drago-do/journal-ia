@@ -25,6 +25,10 @@ const UserSchema = new mongoose.Schema({
     enum: ["admin", "revisor", "author", "user"],
     default: "user",
   },
+  assignArticles: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "articles",
+  },
   createdAt: {
     type: Date,
     default: Date.now,

@@ -4,6 +4,7 @@ const multer = require("multer");
 //Requerir el Schema para CRUD DOCUMENT F_TI_DT_013REV3
 const Article = require("../models/ArticleSchema");
 const PDF_File = require("../models/PdfSchema");
+const User = require("./../models/UserSchema");
 
 //Create Article
 router.post("/", (req, res) => {
@@ -117,5 +118,33 @@ function deletePDFFile(id) {
     .then((data) => res.json(data))
     .catch((error) => res.json({ message: error }));
 }
+
+//ruta para agregar comentario de revisores
+router.put("/add_comment/:idArticle", (req, res) => {
+  const { idArticle } = req.params;
+  const { idUser, comments } = req.body;
+  //Obtener id, usuario que hizo el comentario
+  User.findOne({ _id: idUser })
+    .then((dataUser) => {
+      const { _id, name } = dataUser;
+      //Agregar comentario al documento
+      Article.findOneAndUpdate(
+        { _id: idArticle },
+        {
+          $push: {
+            comments: {
+              _id: _id,
+              name: name,
+              comments: comments,
+            },
+          },
+        }
+      )
+        //Responde con el status 200
+        .then((dataComments) => res.status(200).json(dataComments))
+        .catch((error) => res.json({ message: error }));
+    })
+    .catch((error) => res.json({ message: error }));
+});
 
 module.exports = router;

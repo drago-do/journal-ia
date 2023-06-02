@@ -3,12 +3,15 @@ import axios from "axios";
 import { Grid, Typography } from "@mui/material";
 import ArticleCard from "./ArticleCard";
 
+//Definir variable de entorno
+const url_api = process.env.API_URL;
+
 const Feed = () => {
   const [articles, setArticles] = useState([]);
 
   useEffect(() => {
     // Hacer una llamada a la API para obtener los artículos
-    axios.get("/api/articles").then((response) => {
+    axios.get(url_api + "/article").then((response) => {
       setArticles(response.data);
     });
   }, []);
@@ -16,8 +19,8 @@ const Feed = () => {
   return (
     <Grid container spacing={2}>
       {articles.length > 0 ? (
-        articles.map((article) => (
-          <Grid item key={article.id} xs={12} sm={6} md={4}>
+        articles.map((article, index) => (
+          <Grid item key={index} xs={12} sm={6} md={4}>
             <ArticleCard article={article} />
           </Grid>
         ))

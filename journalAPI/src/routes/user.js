@@ -57,4 +57,30 @@ router.delete("/:id", (req, res) => {
     .catch((error) => res.json({ message: error }));
 });
 
+//Assign articles to revisor
+router.put("/assignArticles/:idUser", (req, res) => {
+  const { idUser } = req.params;
+  const { idArticle } = req.body;
+  User.findByIdAndUpdate(idUser, { $push: { assignArticles: idArticle } })
+    .then((data) => {
+      res.json({ success: true, data: data });
+    })
+    .catch((error) => {
+      res.json({ success: false, message: error });
+    });
+});
+
+//Remove article to revisor
+router.put("/removeArticles/:idUser", (req, res) => {
+  const { idUser } = req.params;
+  const { idArticle } = req.body;
+  User.findByIdAndUpdate(idUser, { $pull: { assignArticles: idArticle } })
+    .then((data) => {
+      res.json({ success: true, data: data });
+    })
+    .catch((error) => {
+      res.json({ success: false, message: error });
+    });
+});
+
 module.exports = router;

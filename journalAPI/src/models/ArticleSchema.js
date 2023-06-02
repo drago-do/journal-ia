@@ -32,9 +32,10 @@ const ArticleSchema = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "pdf_Files",
   },
-  revisor_name: { type: [Schema.Types.ObjectId], ref: "users" },
-  revisor_comments: [{ type: [[Schema.Types.ObjectId, String]] }],
-  admin_comments: { type: String },
+  comments: {
+    type: mongoose.Schema.Types.Mixed,
+    default: {},
+  },
   status: {
     type: String,
     enum: ["wait_revisor", "wait_admin", "published", "reject"],

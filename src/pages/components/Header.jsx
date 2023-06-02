@@ -27,9 +27,11 @@ function Header(props) {
         <IconButton>
           <SearchIcon />
         </IconButton>
-        <Button variant="outlined" size="small">
-          Sign up
-        </Button>
+        <Link href={`/credentials/login`}>
+          <Button variant="outlined" size="small">
+            Iniciar Sesión
+          </Button>
+        </Link>
       </Toolbar>
       <Toolbar
         component="nav"

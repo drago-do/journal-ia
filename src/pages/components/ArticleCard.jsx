@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import {
   Card,
@@ -7,9 +7,47 @@ import {
   Button,
   Typography,
 } from "@mui/material";
+import CardMedia from "@mui/material/CardMedia";
+import axios from "axios";
+
+const UnsplashKey = process.env.UNSPLASH_KEY;
 
 const ArticleCard = ({ article }) => {
   const [isHovered, setIsHovered] = useState(false);
+  const [articleImage, setArticleImage] = useState();
+
+  useEffect(() => {
+    getImageForArticle();
+  }, []);
+
+  const getImageForArticle = () => {
+    axios
+      .get(
+        `https://api.unsplash.com/search/photos?query=${replaceSpacesWithUnderscores(
+          article.category
+        )}`,
+        {
+          headers: {
+            Authorization: `Client-ID ${UnsplashKey}`,
+          },
+        }
+      )
+      .then((response) => {
+        let urlImage;
+        try {
+          urlImage = response.data.results[0].urls.small;
+          setArticleImage(urlImage);
+        } catch (error) {
+          console.log(error);
+          setArticleImage(
+            "https://www.jose-aguilar.com/blog/wp-content/uploads/2014/10/Imagen-no-disponible-282x300.png"
+          );
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
 
   const handleMouseEnter = () => {
     setIsHovered(true);
@@ -32,15 +70,30 @@ const ArticleCard = ({ article }) => {
       }}
     >
       <CardContent>
-        <Typography variant="h6" gutterBottom>
-          {article.title}
-        </Typography>
-        <Typography variant="body2" color="textSecondary" gutterBottom>
-          Publicado el {article.date}
-        </Typography>
-        <Typography variant="body1" paragraph>
-          {article.abstract}
-        </Typography>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <div>
+            <Typography variant="h6" gutterBottom>
+              {article.title}
+            </Typography>
+            <Typography variant="body2" color="textSecondary" gutterBottom>
+              Publicado el {formatDate(article.created_at)}
+            </Typography>
+            <Typography variant="body1" paragraph>
+              {article.abstract}
+            </Typography>
+          </div>
+          <CardMedia
+            component="img"
+            sx={{
+              width: 150,
+              height: 150,
+              display: { xs: "none", sm: "block" },
+              padding: "5px",
+            }}
+            src={articleImage}
+            alt={article.title}
+          />
+        </div>
       </CardContent>
       <CardActions>
         <Link href={`/article/${article.id}`}>
@@ -52,5 +105,15 @@ const ArticleCard = ({ article }) => {
     </Card>
   );
 };
+
+function formatDate(dateString) {
+  const options = { year: "numeric", month: "long", day: "numeric" };
+  const date = new Date(dateString);
+  return date.toLocaleDateString("es-ES", options);
+}
+
+function replaceSpacesWithUnderscores(str) {
+  return str.replace(/ /g, "_");
+}
 
 export default ArticleCard;
