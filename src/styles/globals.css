@@ -17,6 +17,11 @@
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
+  color: (var(--foreground-rgb));
   background: var(--background-rgb);
+}
+
+.userCard {
+  text-decoration: none;
+  color: inherit;
 }

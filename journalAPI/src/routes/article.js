@@ -62,6 +62,14 @@ const upload = multer({
   },
 });
 
+//Get articles of author
+router.get("/author/:id", (req, res) => {
+  const { id } = req.params;
+  Article.find({ author: id })
+    .then((data) => res.json(data))
+    .catch((error) => res.json({ successful: false, message: error }));
+});
+
 router.post("/upload_pdf/:id", upload.single(), (req, res) => {
   const pdf = req.file;
   const { id } = req.params;

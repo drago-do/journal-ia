@@ -12,6 +12,11 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
+import Cookies from "js-cookie";
+import axios from "axios";
+
+//Definir variable de entorno
+const url_api = process.env.API_URL;
 
 function Copyright(props) {
   return (
@@ -39,10 +44,32 @@ export default function SignIn() {
   const handleSubmit = (event) => {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
+    const email = data.get("email");
+    const password = data.get("password");
+    //Axios post to url_api/user/login  set email password
+    axios
+      .post(url_api + "/user/login", {
+        email: email,
+        password: password,
+      })
+      .then((response) => {
+        if (response.data.success) {
+          //Save response.data in cookies
+          Cookies.set("id_user", response.data.data._id);
+          Cookies.set("name", response.data.data.name);
+          Cookies.set("lastname", response.data.data.lastname);
+          Cookies.set("email", response.data.data.email);
+          Cookies.set("role", response.data.data.role);
+          //Redirect
+          window.location.href = "/";
+        } else {
+          //Show error message
+          alert("Usuario o contraseña incorrecta");
+        }
+      })
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   return (
@@ -92,6 +119,7 @@ export default function SignIn() {
             <FormControlLabel
               control={<Checkbox value="remember" color="primary" />}
               label="Recordar credenciales"
+              style={{ color: "#000" }}
             />
             <Button
               type="submit"

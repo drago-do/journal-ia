@@ -57,6 +57,20 @@ router.delete("/:id", (req, res) => {
     .catch((error) => res.json({ message: error }));
 });
 
+//Verify credentials user and pass if is true return user
+router.post("/login", (req, res) => {
+  const { email, password } = req.body;
+  User.findOne({ email, password })
+    .then((data) => {
+      if (data) {
+        res.json({ success: true, data: data });
+      } else {
+        res.json({ success: false, message: "User or password incorrect" });
+      }
+    })
+    .catch((error) => res.json({ success: false, message: error }));
+});
+
 //Assign articles to revisor
 router.put("/assignArticles/:idUser", (req, res) => {
   const { idUser } = req.params;

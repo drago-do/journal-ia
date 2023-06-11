@@ -6,6 +6,8 @@ import IconButton from "@mui/material/IconButton";
 import SearchIcon from "@mui/icons-material/Search";
 import Typography from "@mui/material/Typography";
 import Link from "@mui/material/Link";
+import UserLoginButton from "./UserLoginButton";
+import UserInfoButton from "./UserInfoButton";
 
 function Header(props) {
   const { sections, title } = props;
@@ -13,7 +15,7 @@ function Header(props) {
   return (
     <React.Fragment>
       <Toolbar sx={{ borderBottom: 1, borderColor: "divider" }}>
-        <Button size="small">Subscribe</Button>
+        <UserInfoButton />
         <Typography
           component="h2"
           variant="h5"
@@ -27,11 +29,7 @@ function Header(props) {
         <IconButton>
           <SearchIcon />
         </IconButton>
-        <Link href={`/credentials/login`}>
-          <Button variant="outlined" size="small">
-            Iniciar Sesión
-          </Button>
-        </Link>
+        <UserLoginButton />
       </Toolbar>
       <Toolbar
         component="nav"
