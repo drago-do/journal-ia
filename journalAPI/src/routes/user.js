@@ -1,6 +1,7 @@
 const { Router } = require("express");
 const router = Router();
 const User = require("../models/UserSchema");
+const Article = require("../models/ArticleSchema");
 
 //Create user
 router.post("/", (req, res) => {
@@ -80,6 +81,24 @@ router.put("/assignArticles/:idUser", (req, res) => {
       res.json({ success: true, data: data });
     })
     .catch((error) => {
+      res.json({ success: false, message: error });
+    });
+});
+
+router.get("/assignedArticles/:idUser", (req, res) => {
+  const { idUser } = req.params;
+  User.findById(idUser)
+    .populate("assignArticles")
+    .then((user) => {
+      if (!user) {
+        console.log("usuario no existe");
+        res.json({ success: false, message: "User not found" });
+        return;
+      }
+      res.json(user.assignArticles);
+    })
+    .catch((error) => {
+      console.log(error);
       res.json({ success: false, message: error });
     });
 });

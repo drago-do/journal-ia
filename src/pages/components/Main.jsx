@@ -17,19 +17,21 @@ const Feed = () => {
   }, []);
 
   return (
-    <Grid container spacing={2}>
-      {articles.length > 0 ? (
-        articles.map((article, index) => (
-          <Grid item key={index} xs={12} sm={6} md={4}>
-            <ArticleCard article={article} />
+    <div style={{ width: "100%", padding: "40px" }}>
+      <Grid container spacing={3}>
+        {articles.length > 0 ? (
+          articles.map((article, index) => (
+            <Grid item key={index} xs={12} sm={6} md={4}>
+              <ArticleCard article={article} />
+            </Grid>
+          ))
+        ) : (
+          <Grid item xs={12}>
+            <Typography variant="h6">No hay artículos disponibles.</Typography>
           </Grid>
-        ))
-      ) : (
-        <Grid item xs={12}>
-          <Typography variant="h6">No hay artículos disponibles.</Typography>
-        </Grid>
-      )}
-    </Grid>
+        )}
+      </Grid>
+    </div>
   );
 };
 

@@ -10,7 +10,7 @@ import UserLoginButton from "./UserLoginButton";
 import UserInfoButton from "./UserInfoButton";
 
 function Header(props) {
-  const { sections, title } = props;
+  const { title } = props;
 
   return (
     <React.Fragment>
@@ -24,43 +24,20 @@ function Header(props) {
           noWrap
           sx={{ flex: 1 }}
         >
-          {title}
+          <Link href={"/"} className="no-underline text-black">
+            {title}
+          </Link>
         </Typography>
         <IconButton>
           <SearchIcon />
         </IconButton>
         <UserLoginButton />
       </Toolbar>
-      <Toolbar
-        component="nav"
-        variant="dense"
-        sx={{ justifyContent: "space-between", overflowX: "auto" }}
-      >
-        {Array.isArray(sections) &&
-          sections.map((section) => (
-            <Link
-              color="inherit"
-              noWrap
-              key={section.title}
-              variant="body2"
-              href={section.url}
-              sx={{ p: 1, flexShrink: 0 }}
-            >
-              {section.title}
-            </Link>
-          ))}
-      </Toolbar>
     </React.Fragment>
   );
 }
 
 Header.propTypes = {
-  sections: PropTypes.arrayOf(
-    PropTypes.shape({
-      title: PropTypes.string.isRequired,
-      url: PropTypes.string.isRequired,
-    })
-  ).isRequired,
   title: PropTypes.string.isRequired,
 };
 

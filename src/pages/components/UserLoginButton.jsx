@@ -11,12 +11,21 @@ export default function UserLoginButton() {
       setIsLoggedIn(true);
     }
   }, []);
+
+  const handleLogoutClick = () => {
+    //Delete all cookies of user and return to main page
+    Cookies.remove("id_user");
+    Cookies.remove("name");
+    Cookies.remove("lastname");
+    Cookies.remove("email");
+    Cookies.remove("role");
+    window.location.href = "/";
+  };
+
   return isLoggedIn ? (
-    <Link href={`/credentials/logout`}>
-      <Button variant="outlined" size="small">
-        Cerrar Sesión
-      </Button>
-    </Link>
+    <Button variant="outlined" size="small" onClick={handleLogoutClick}>
+      Cerrar Sesión
+    </Button>
   ) : (
     <Link href={`/credentials/login`}>
       <Button variant="outlined" size="small">

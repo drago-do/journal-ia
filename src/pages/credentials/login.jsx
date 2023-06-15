@@ -116,11 +116,6 @@ export default function SignIn() {
               id="password"
               autoComplete="current-password"
             />
-            <FormControlLabel
-              control={<Checkbox value="remember" color="primary" />}
-              label="Recordar credenciales"
-              style={{ color: "#000" }}
-            />
             <Button
               type="submit"
               fullWidth

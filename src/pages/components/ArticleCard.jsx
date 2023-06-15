@@ -10,7 +10,7 @@ import {
 import CardMedia from "@mui/material/CardMedia";
 import axios from "axios";
 
-const UnsplashKey = process.env.UNSPLASH_KEY;
+const UnsplashKey = "d";
 
 const ArticleCard = ({ article }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -72,14 +72,11 @@ const ArticleCard = ({ article }) => {
       <CardContent>
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <div>
-            <Typography variant="h6" gutterBottom>
+            <Typography variant="h6" >
               {article.title}
             </Typography>
             <Typography variant="body2" color="textSecondary" gutterBottom>
               Publicado el {formatDate(article.created_at)}
-            </Typography>
-            <Typography variant="body1" paragraph>
-              {article.abstract}
             </Typography>
           </div>
           <CardMedia
@@ -96,7 +93,7 @@ const ArticleCard = ({ article }) => {
         </div>
       </CardContent>
       <CardActions>
-        <Link href={`/article/${article.id}`}>
+        <Link href={`/article/${article._id}`}>
           <Button size="small" color="primary">
             Ver más
           </Button>

@@ -155,4 +155,20 @@ router.put("/add_comment/:idArticle", (req, res) => {
     .catch((error) => res.json({ message: error }));
 });
 
+//Para cambiar el status de un articulo
+router.put("/change_status/:idArticle", (req, res) => {
+  const { idArticle } = req.params;
+  const { status } = req.body;
+  Article.findOneAndUpdate(
+    { _id: idArticle },
+    {
+      $set: {
+        status: status,
+      },
+    }
+  )
+    .then((data) => res.status(200).json(data))
+    .catch((error) => res.json({ message: error }));
+});
+
 module.exports = router;

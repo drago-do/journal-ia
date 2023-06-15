@@ -12,37 +12,74 @@ import LockOutlinedIcon from "@mui/icons-material/LockOutlined";
 import Typography from "@mui/material/Typography";
 import Container from "@mui/material/Container";
 import { createTheme, ThemeProvider } from "@mui/material/styles";
-
-function Copyright(props) {
-  return (
-    <Typography
-      variant="body2"
-      color="text.secondary"
-      align="center"
-      {...props}
-    >
-      {"Copyright © "}
-      <Link color="inherit" href="https://mui.com/">
-        openJournal.com
-      </Link>{" "}
-      {new Date().getFullYear()}
-      {"."}
-    </Typography>
-  );
-}
+import { useState } from "react";
+import axios from "axios";
+import Cookies from "js-cookie";
+import Alert from "@mui/material/Alert";
+import AlertTitle from "@mui/material/AlertTitle";
+import Stack from "@mui/material/Stack";
 
 // TODO remove, this demo shouldn't need to reset the theme.
+//Definir variable de entorno
+const url_api = process.env.API_URL;
 
 const defaultTheme = createTheme();
 
 export default function SignUp() {
+  const [passwordIsCorrect, setPasswordIsCorrect] = useState(null);
+  const [password, setPassword] = useState("");
+  const [password2, setPassword2] = useState("");
+
+  const handlePasswordChange = (event) => {
+    setPassword(event.target.value);
+    if (event.target.value.length < 5) {
+      setPasswordIsCorrect(false);
+    } else {
+      setPasswordIsCorrect(true);
+    }
+  };
+
+  const handlePassword2Change = (event) => {
+    setPassword2(event.target.value);
+  };
+
   const handleSubmit = (event) => {
     event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    console.log({
-      email: data.get("email"),
-      password: data.get("password"),
-    });
+    password !== password2
+      ? setPasswordIsCorrect(false)
+      : setPasswordIsCorrect(null);
+    if (passwordIsCorrect) {
+      const data = new FormData(event.currentTarget);
+      let name = data.get("name");
+      let lastName = data.get("lastName");
+      let email = data.get("email");
+      let password = data.get("password");
+      // !Send to api
+      axios
+        .post(url_api + "/user", {
+          name: name,
+          lastname: lastName,
+          email: email,
+          password: password,
+        })
+        .then((response) => {
+          if (response.data._id) {
+            //Save response.data in cookies
+            Cookies.set("id_user", response.data._id);
+            Cookies.set("name", response.data.name);
+            Cookies.set("lastname", response.data.lastname);
+            Cookies.set("email", response.data.email);
+            Cookies.set("role", response.data.role);
+            window.location.href = "/";
+          } else {
+            alert(response.data.msg);
+          }
+        })
+        .catch((error) => {
+          console.log(error);
+          alert("Error al registrar usuario");
+        });
+    }
   };
 
   return (
@@ -61,7 +98,7 @@ export default function SignUp() {
             <LockOutlinedIcon />
           </Avatar>
           <Typography component="h1" variant="h5">
-            Sign up
+            Regístrate
           </Typography>
           <Box
             component="form"
@@ -73,11 +110,11 @@ export default function SignUp() {
               <Grid item xs={12} sm={6}>
                 <TextField
                   autoComplete="given-name"
-                  name="firstName"
+                  name="name"
                   required
                   fullWidth
-                  id="firstName"
-                  label="First Name"
+                  id="name"
+                  label="Nombre(s)"
                   autoFocus
                 />
               </Grid>
@@ -86,7 +123,7 @@ export default function SignUp() {
                   required
                   fullWidth
                   id="lastName"
-                  label="Last Name"
+                  label="Apellidos(s)"
                   name="lastName"
                   autoComplete="family-name"
                 />
@@ -96,7 +133,7 @@ export default function SignUp() {
                   required
                   fullWidth
                   id="email"
-                  label="Email Address"
+                  label="Correo Electrónico"
                   name="email"
                   autoComplete="email"
                 />
@@ -106,21 +143,26 @@ export default function SignUp() {
                   required
                   fullWidth
                   name="password"
-                  label="Password"
+                  label="Contraseña"
                   type="password"
                   id="password"
                   autoComplete="new-password"
+                  onChange={handlePasswordChange}
                 />
               </Grid>
               <Grid item xs={12}>
-                <FormControlLabel
-                  control={
-                    <Checkbox value="allowExtraEmails" color="primary" />
-                  }
-                  label="I want to receive inspiration, marketing promotions and updates via email."
+                <TextField
+                  required
+                  fullWidth
+                  name="password-2"
+                  label="Repite tu contraseña"
+                  type="password"
+                  id="password-2"
+                  onChange={handlePassword2Change}
                 />
               </Grid>
             </Grid>
+            {passwordIsCorrect === false ? warningAlert() : null}
             <Button
               type="submit"
               fullWidth
@@ -128,19 +170,29 @@ export default function SignUp() {
               sx={{ mt: 3, mb: 2 }}
               style={{ background: "var(--primary-bg-color)" }}
             >
-              Sign Up
+              Registrar
             </Button>
             <Grid container justifyContent="flex-end">
               <Grid item>
-                <Link href="#" variant="body2">
-                  Already have an account? Sign in
+                <Link href="/credentials/login" variant="body2">
+                  Ya tienes cuenta? Inicia sesión
                 </Link>
               </Grid>
             </Grid>
           </Box>
         </Box>
-        <Copyright sx={{ mt: 5 }} />
       </Container>
     </ThemeProvider>
   );
 }
+
+const warningAlert = () => {
+  return (
+    <Alert severity="error" style={{ margin: "10px 0" }}>
+      <AlertTitle>
+        Las contraseñas no coinciden o son menores a 5 caracteres
+      </AlertTitle>
+      Por favor, verifica que las contraseñas coincidan.
+    </Alert>
+  );
+};
