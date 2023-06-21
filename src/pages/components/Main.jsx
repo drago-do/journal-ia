@@ -12,7 +12,12 @@ const Feed = () => {
   useEffect(() => {
     // Hacer una llamada a la API para obtener los artículos
     axios.get(url_api + "/article").then((response) => {
-      setArticles(response.data);
+      let allArticles = response.data;
+      //Eliminar artículos que no tengan el estado "published"
+      allArticles = allArticles.filter(
+        (article) => article.status === "published"
+      );
+      setArticles(allArticles);
     });
   }, []);
 
@@ -21,6 +26,7 @@ const Feed = () => {
       <Grid container spacing={3}>
         {articles.length > 0 ? (
           articles.map((article, index) => (
+            // Renderiza solo los que están públicos
             <Grid item key={index} xs={12} sm={6} md={4}>
               <ArticleCard article={article} />
             </Grid>

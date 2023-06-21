@@ -6,9 +6,21 @@ import { Typography } from "@mui/material";
 import * as React from "react";
 import Box from "@mui/material/Box";
 import ButtonGroup from "@mui/material/ButtonGroup";
-
+import PropTypes from "prop-types";
+import Avatar from "@mui/material/Avatar";
+import List from "@mui/material/List";
+import ListItem from "@mui/material/ListItem";
+import ListItemAvatar from "@mui/material/ListItemAvatar";
+import ListItemButton from "@mui/material/ListItemButton";
+import ListItemText from "@mui/material/ListItemText";
+import DialogTitle from "@mui/material/DialogTitle";
+import Dialog from "@mui/material/Dialog";
+import PersonIcon from "@mui/icons-material/Person";
+import AddIcon from "@mui/icons-material/Add";
+import { blue, yellow } from "@mui/material/colors";
 import Header from "./../components/Header";
 import Cookies from "js-cookie";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 const url_api = process.env.API_URL;
 
@@ -66,8 +78,6 @@ export default function ArticlePage() {
       axios
         .get(`${url_api}/user/${Cookies.get("id_user")}`)
         .then((response) => {
-          console.log(response.data);
-          console.log(response.data.assignArticles.includes(id));
           if (response.data.assignArticles.includes(id)) {
             setCanComment(true);
             return true;
@@ -128,7 +138,6 @@ export default function ArticlePage() {
     axios
       .get(`${url_api}/user/${idAuthor}`)
       .then((response) => {
-        console.log(response);
         setAuthorName(response.data.name + " " + response.data.lastname);
       })
       .catch(() => alert("Error al obtener el nombre del autor"));
@@ -225,6 +234,7 @@ export default function ArticlePage() {
                 Descargar PDF
               </Button>
             </a>
+            {admin && <AssignArticles article={article} />}
           </div>
           <br />
           <br />
@@ -245,33 +255,74 @@ export default function ArticlePage() {
 }
 
 const CommentsOfArticle = ({ article }) => {
-  const [comments, setComments] = useState(null);
+  const { comments } = article;
+  const [showComments, setShowComments] = useState(false);
+  const [commentsFiltered, setCommentsFiltered] = useState([]);
+
+  const userCanViewComments = (status) => {
+    const role = Cookies.get("role");
+    return (
+      role === "admin" ||
+      role === "revisor" ||
+      (role === "author" && status !== "wait_revisor")
+    );
+  };
+
+  const showOnlyCommentsOfUser = () => {
+    const idUser = Cookies.get("id_user");
+    if (comments) {
+      const filtered = comments.filter((comment) => comment._id === idUser);
+      setCommentsFiltered(filtered);
+    }
+  };
+
   useEffect(() => {
-    // Obtener comentarios del artículo
-    setComments(article.comments);
+    setShowComments(userCanViewComments(article.status));
   }, [article]);
+
+  useEffect(() => {
+    if (Cookies.get("role") === "revisor") {
+      showOnlyCommentsOfUser();
+    }
+  }, [comments]);
 
   return (
     <div>
-      {comments &&
-        comments.map((comment, index) => {
-          return (
-            <div
-              key={index}
-              className="bg-white rounded-lg shadow-md p-4 mb-4 flex"
-            >
-              <img
-                src="/assets/revisor.png"
-                alt="revisor"
-                style={{ maxHeight: "50px", marginRight: "30px" }}
-              />
-              <div>
-                <p className="text-gray-700">{comment.comments}</p>
-                <p className="text-gray-500">{comment.name}</p>
+      {showComments &&
+        (Cookies.get("role") === "revisor"
+          ? commentsFiltered.map((comment, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-lg shadow-md p-4 mb-4 flex"
+              >
+                <img
+                  src="/assets/revisor.png"
+                  alt="revisor"
+                  style={{ maxHeight: "50px", marginRight: "30px" }}
+                />
+                <div>
+                  <p className="text-gray-700">{comment.comments}</p>
+                  <p className="text-gray-500">{comment.name}</p>
+                </div>
               </div>
-            </div>
-          );
-        })}
+            ))
+          : comments &&
+            comments.map((comment, index) => (
+              <div
+                key={index}
+                className="bg-white rounded-lg shadow-md p-4 mb-4 flex"
+              >
+                <img
+                  src="/assets/revisor.png"
+                  alt="revisor"
+                  style={{ maxHeight: "50px", marginRight: "30px" }}
+                />
+                <div>
+                  <p className="text-gray-700">{comment.comments}</p>
+                  <p className="text-gray-500">{comment.name}</p>
+                </div>
+              </div>
+            )))}
     </div>
   );
 };
@@ -290,7 +341,6 @@ const AddComment = ({ article }) => {
         comments,
       })
       .then((response) => {
-        console.log(response.data);
         setComment("");
         //Reload page
         window.location.reload();
@@ -350,13 +400,11 @@ const ChangeStatusArticle = ({ actualStatus, idArticle }) => {
     ) {
       return;
     }
-    console.log("Nuevo estado:", status);
     axios
       .put(`${url_api}/article/change_status/${idArticle}`, {
         status,
       })
       .then((response) => {
-        console.log(response.data);
         //Reload page
         window.location.reload();
       })
@@ -395,3 +443,116 @@ const ChangeStatusArticle = ({ actualStatus, idArticle }) => {
     </Box>
   );
 };
+
+const AssignArticles = ({ article }) => {
+  const [revisorUsers, setRevisorUsers] = useState();
+  const [open, setOpen] = React.useState(false);
+  const [revisorSelected, setRevisorSelected] = useState(null);
+
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = (value) => {
+    setOpen(false);
+    if (value !== null) setRevisorSelected(value);
+  };
+
+  useEffect(() => {
+    getRevisorUsers();
+  }, []);
+
+  useEffect(() => {
+    if (revisorSelected !== null) assignRevisorToArticle();
+  }, [revisorSelected]);
+
+  const assignRevisorToArticle = () => {
+    axios
+      .put(`${url_api}/user/assignArticles/${revisorSelected._id}`, {
+        idArticle: article._id,
+      })
+      .then((response) => {
+        window.location.reload();
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const getRevisorUsers = () => {
+    axios
+      .get(`${url_api}/user`)
+      .then((response) => {
+        let allUsers = response.data;
+        let revisorUsers = allUsers.filter((user) => user.role === "revisor");
+        setRevisorUsers(revisorUsers);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  return (
+    <div>
+      <Button variant="outlined" onClick={handleClickOpen}>
+        Asignar a revisor
+      </Button>
+      <AssignArticlesSimpleDialog
+        open={open}
+        onClose={handleClose}
+        revisorUsers={revisorUsers}
+        articleID={article._id}
+      />
+    </div>
+  );
+};
+
+function AssignArticlesSimpleDialog(props) {
+  const { onClose, open, revisorUsers, articleID } = props;
+
+  const handleClose = () => {
+    onClose(null);
+  };
+
+  const handleListItemClick = (value) => {
+    onClose(value);
+  };
+
+  return (
+    <Dialog onClose={handleClose} open={open}>
+      <DialogTitle>Selecciona un revisor para asignarlo</DialogTitle>
+      <List sx={{ pt: 0 }}>
+        {revisorUsers &&
+          revisorUsers.map((revisor, index) => (
+            <ListItem disableGutters key={index}>
+              <ListItemButton
+                onClick={() => handleListItemClick(revisor)}
+                key={index}
+                style={{ justifyContent: "space-between" }}
+              >
+                <div style={{ display: "flex" }}>
+                  <ListItemAvatar>
+                    <Avatar sx={{ bgcolor: yellow[100], color: blue[600] }}>
+                      <PersonIcon />
+                    </Avatar>
+                  </ListItemAvatar>
+                  <div>
+                    <ListItemText
+                      primary={revisor.name + " " + revisor.lastname}
+                    />
+                    <ListItemText primary={revisor.email} />
+                  </div>
+                </div>
+                {
+                  // Verifica si el usuario ya tiene el articulo asignado
+                  revisor.assignArticles.includes(articleID) ? (
+                    <CheckCircleIcon />
+                  ) : null
+                }
+              </ListItemButton>
+            </ListItem>
+          ))}
+      </List>
+    </Dialog>
+  );
+}

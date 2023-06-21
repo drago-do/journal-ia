@@ -7,6 +7,7 @@ const AssistantSchema = new Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "articles",
     required: true,
+    unique: true,
   },
   abstract_opinion: { type: String, required: true },
   category_opinion: {

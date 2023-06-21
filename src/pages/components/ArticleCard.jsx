@@ -10,7 +10,7 @@ import {
 import CardMedia from "@mui/material/CardMedia";
 import axios from "axios";
 
-const UnsplashKey = "d";
+const UnsplashKey = "x";
 
 const ArticleCard = ({ article }) => {
   const [isHovered, setIsHovered] = useState(false);
@@ -72,9 +72,7 @@ const ArticleCard = ({ article }) => {
       <CardContent>
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <div>
-            <Typography variant="h6" >
-              {article.title}
-            </Typography>
+            <Typography variant="h6">{article.title}</Typography>
             <Typography variant="body2" color="textSecondary" gutterBottom>
               Publicado el {formatDate(article.created_at)}
             </Typography>

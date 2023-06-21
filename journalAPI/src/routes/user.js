@@ -72,17 +72,28 @@ router.post("/login", (req, res) => {
     .catch((error) => res.json({ success: false, message: error }));
 });
 
-//Assign articles to revisor
-router.put("/assignArticles/:idUser", (req, res) => {
-  const { idUser } = req.params;
-  const { idArticle } = req.body;
-  User.findByIdAndUpdate(idUser, { $push: { assignArticles: idArticle } })
-    .then((data) => {
-      res.json({ success: true, data: data });
-    })
-    .catch((error) => {
-      res.json({ success: false, message: error });
-    });
+// Assign articles to revisor
+router.put("/assignArticles/:idUser", async (req, res) => {
+  try {
+    const { idUser } = req.params;
+    const { idArticle } = req.body;
+
+    const user = await User.findById(idUser);
+
+    if (user.assignArticles.includes(idArticle)) {
+      await User.findByIdAndUpdate(idUser, {
+        $pull: { assignArticles: idArticle },
+      });
+    } else {
+      await User.findByIdAndUpdate(idUser, {
+        $push: { assignArticles: idArticle },
+      });
+    }
+
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 router.get("/assignedArticles/:idUser", (req, res) => {
