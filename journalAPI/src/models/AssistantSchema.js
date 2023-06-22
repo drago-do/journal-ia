@@ -9,16 +9,15 @@ const AssistantSchema = new Schema({
     required: true,
     unique: true,
   },
-  abstract_opinion: { type: String, required: true },
-  category_opinion: {
-    type: String,
-    required: true,
-  },
   transcript_pdf: {
     type: String,
     required: true,
   },
-  general_opinion: { type: String, required: true },
+  abstract_opinion: { type: String },
+  category_opinion: {
+    type: String,
+  },
+  general_opinion: { type: String },
   specific_opinion: { type: [[String]] },
   final_eval: { type: String },
 });

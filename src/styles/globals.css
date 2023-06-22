@@ -6,6 +6,10 @@
   --foreground-rgb: 2, 2, 2;
   --background-rgb: 255, 255, 255;
   --primary-bg-color: rgba(5, 132, 176, 0.53);
+  --text-green-bg: #5E7A28;
+  --strong-green-bg: #ADC77D;
+
+
 }
 
 @media (prefers-color-scheme: dark) {
@@ -24,4 +28,9 @@ body {
 .userCard {
   text-decoration: none;
   color: inherit;
+}
+
+.shadowToPngImage{
+  -webkit-filter: drop-shadow(5px 5px 5px #222);
+  filter: drop-shadow(5px 5px 5px #222);
 }
