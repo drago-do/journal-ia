@@ -23,7 +23,7 @@ const UserSchema = new mongoose.Schema({
   role: {
     type: String,
     enum: ["admin", "revisor", "author", "user"],
-    default: "user",
+    default: "author",
   },
   assignArticles: {
     type: [mongoose.Schema.Types.ObjectId],

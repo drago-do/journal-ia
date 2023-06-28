@@ -49,6 +49,7 @@ app.use("/article", require("./routes/article"));
 app.use("/user", require("./routes/user"));
 app.use("/pdf", require("./routes/pdf"));
 app.use("/assistant", require("./routes/assistant"));
+app.use("/commentOfRevisor", require("./routes/commentOfRevisor"));
 
 //Iniciando el servidor
 app.listen(app.get("port"), () => {
