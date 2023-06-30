@@ -21,6 +21,14 @@ import { blue, yellow } from "@mui/material/colors";
 import Header from "./../components/Header";
 import Cookies from "js-cookie";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import MainGPT from "./componentsGPT/MainGPT";
+import ViewComments from "./components/ViewComments";
+import Link from "next/link";
+import {
+  getCategoryColor,
+  getStatusColor,
+  getStatusText,
+} from "@/util/colorCategoryStatus";
 
 const url_api = process.env.API_URL;
 
@@ -39,6 +47,13 @@ export default function ArticlePage() {
   const [canComment, setCanComment] = useState(false);
   const [canViewStatus, setCanViewStatus] = useState(false);
   const [authorName, setAuthorName] = useState("");
+  const [urlForNewComment, setUrlForNewComment] = useState(null);
+
+  const [canAssignRevisor, setCanAssignRevisor] = useState(false);
+
+  const handleAssignRevisor = (value) => {
+    setCanAssignRevisor(value);
+  };
 
   useEffect(() => {
     // Obtener artículo
@@ -53,6 +68,7 @@ export default function ArticlePage() {
     setAdmin(Cookies.get("role") === "admin" ? true : false);
     thisUserCanComment();
     thisUserCanViewStatusArticle();
+    setUrlForNewComment("/article/newComment/" + id);
   }, [id]);
 
   useEffect(() => {
@@ -85,54 +101,9 @@ export default function ArticlePage() {
           return false;
         });
     }
-    if (role === "admin") return true;
+    if (role === "admin") setCanComment(true);
     return false;
   };
-
-  function getCategoryColor(category) {
-    switch (category) {
-      case "Ingeniería Civil":
-        return "bg-blue-500 text-white";
-      case "Ciencias en Alimentos":
-        return "bg-green-500 text-white";
-      case "Administración":
-        return "bg-red-500 text-white";
-      case "Logística":
-        return "bg-purple-500 text-white";
-      case "Turismo":
-        return "bg-yellow-500 text-black";
-      case "Industria 4.0":
-        return "bg-teal-500 text-white";
-      case "Investigación Educativa":
-        return "bg-pink-500 text-white";
-      case "Ciencias Básicas":
-        return "bg-indigo-500 text-white";
-      case "Sistemas Computacionales":
-        return "bg-orange-500 text-white";
-      case "Mecatronica":
-        return "bg-cyan-500 text-white";
-      case "Electromecánica":
-        return "bg-lime-500 text-black";
-      case "Gestión Empresarial":
-        return "bg-gray-500 text-white";
-      default:
-        return "";
-    }
-  }
-
-  function getStatusColor(status) {
-    switch (status) {
-      case "wait_revisor":
-        return "bg-yellow-500 text-black";
-      case "published":
-        return "bg-green-500 text-withe";
-      case "reject":
-        return "bg-red-500 text-white";
-      // Agrega más casos según tus estados y colores deseados
-      default:
-        return "";
-    }
-  }
 
   function getNameOfAuthor(idAuthor) {
     axios
@@ -147,15 +118,13 @@ export default function ArticlePage() {
     return (
       <div
         style={{
-          width: "95%",
-          display: "flex",
-          justifyContent: "space-between",
           marginBottom: "20px",
         }}
+        className="flex flex-col sm:flex-row justify-between"
       >
-        <p style={infoStyle} className={getCategoryColor(article.category)}>
+        <span style={infoStyle} className={getCategoryColor(article.category)}>
           {article.category}
-        </p>
+        </span>
         <div>
           Escrito por:{" "}
           <span
@@ -192,12 +161,12 @@ export default function ArticlePage() {
             <Typography
               variant="caption"
               style={infoStyle}
-              className={getStatusColor(article.status) + "rounded"}
+              className={getStatusColor(article.status) + "rounded p-2"}
             >
-              {article.status}
+              {getStatusText(article.status)}
             </Typography>
           )}
-          <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <div className="flex flex-col md:flex-row justify-around">
             <p>
               Fecha de creación:
               <span
@@ -234,143 +203,41 @@ export default function ArticlePage() {
                 Descargar PDF
               </Button>
             </a>
-            {admin && <AssignArticles article={article} />}
+            {admin && canAssignRevisor && <AssignArticles article={article} />}
           </div>
           <br />
           <br />
           <br />
-          {admin && (
-            <ChangeStatusArticle
-              actualStatus={article.status}
-              idArticle={article._id}
-            />
+          {admin && article && (
+            <>
+              <ChangeStatusArticle
+                actualStatus={article.status}
+                idArticle={article._id}
+              />
+              <MainGPT
+                articleID={article._id}
+                handleAssignFunction={handleAssignRevisor}
+              />
+            </>
           )}
-          <CommentsOfArticle article={article} />
-          {canComment && <AddComment article={article} />}
+          <ViewComments article={article._id} status={article.status} />
+          {canComment && (
+            <Button
+              className="w-full mb-10 mt-2"
+              variant="contained"
+              style={{ background: "var(--primary-bg-color)" }}
+            >
+              <Link className="w-full" href={urlForNewComment}>
+                Agregar nuevo comentario
+              </Link>
+            </Button>
+          )}
           {/* Añade el botón de descarga del PDF */}
         </div>
       )}
     </div>
   );
 }
-
-const CommentsOfArticle = ({ article }) => {
-  const { comments } = article;
-  const [showComments, setShowComments] = useState(false);
-  const [commentsFiltered, setCommentsFiltered] = useState([]);
-
-  const userCanViewComments = (status) => {
-    const role = Cookies.get("role");
-    return (
-      role === "admin" ||
-      role === "revisor" ||
-      (role === "author" && status !== "wait_revisor")
-    );
-  };
-
-  const showOnlyCommentsOfUser = () => {
-    const idUser = Cookies.get("id_user");
-    if (comments) {
-      const filtered = comments.filter((comment) => comment._id === idUser);
-      setCommentsFiltered(filtered);
-    }
-  };
-
-  useEffect(() => {
-    setShowComments(userCanViewComments(article.status));
-  }, [article]);
-
-  useEffect(() => {
-    if (Cookies.get("role") === "revisor") {
-      showOnlyCommentsOfUser();
-    }
-  }, [comments]);
-
-  return (
-    <div>
-      {showComments &&
-        (Cookies.get("role") === "revisor"
-          ? commentsFiltered.map((comment, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-lg shadow-md p-4 mb-4 flex"
-              >
-                <img
-                  src="/assets/revisor.png"
-                  alt="revisor"
-                  style={{ maxHeight: "50px", marginRight: "30px" }}
-                />
-                <div>
-                  <p className="text-gray-700">{comment.comments}</p>
-                  <p className="text-gray-500">{comment.name}</p>
-                </div>
-              </div>
-            ))
-          : comments &&
-            comments.map((comment, index) => (
-              <div
-                key={index}
-                className="bg-white rounded-lg shadow-md p-4 mb-4 flex"
-              >
-                <img
-                  src="/assets/revisor.png"
-                  alt="revisor"
-                  style={{ maxHeight: "50px", marginRight: "30px" }}
-                />
-                <div>
-                  <p className="text-gray-700">{comment.comments}</p>
-                  <p className="text-gray-500">{comment.name}</p>
-                </div>
-              </div>
-            )))}
-    </div>
-  );
-};
-
-const AddComment = ({ article }) => {
-  const [comment, setComment] = useState("");
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const idUser = Cookies.get("id_user");
-    const comments = comment;
-    // Enviar comentario
-    axios
-      .put(`${url_api}/article/add_comment/${article._id}`, {
-        idUser,
-        comments,
-      })
-      .then((response) => {
-        setComment("");
-        //Reload page
-        window.location.reload();
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-
-  return (
-    <div>
-      <h3 className="text-xl font-semibold mb-4">Agregar Comentario</h3>
-      <form onSubmit={handleSubmit}>
-        <textarea
-          className="w-full p-4 rounded-lg shadow-md mb-4"
-          rows={4}
-          placeholder="Escribe tu comentario..."
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-        ></textarea>
-        <button
-          className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
-          type="submit"
-        >
-          Enviar Comentario
-        </button>
-      </form>
-    </div>
-  );
-};
 
 const ChangeStatusArticle = ({ actualStatus, idArticle }) => {
   const [newStatus, setNewStatus] = useState(actualStatus);

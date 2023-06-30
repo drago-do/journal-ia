@@ -9,9 +9,10 @@ import ViewFinalEval from "./ViewFinalEval";
 import GenerarGPT from "./GenerarGPT";
 
 const url_api = process.env.API_URL;
-const articleID = "64924afafe72da3bda4302ac";
+// const articleID = "64924afafe72da3bda4302ac";
 
-export default function MainGPT() {
+export default function MainGPT({ articleID, handleAssignFunction }) {
+  const [dataBaseArticleID, setDataBaseArticleID] = useState(null);
   const [transcript, setTranscript] = useState(null);
   const [abstract, setAbstract] = useState(null);
   const [category_opinion, setCategory_opinion] = useState(null);
@@ -22,29 +23,32 @@ export default function MainGPT() {
   const [listOfComponents, setListOfComponents] = useState(null);
 
   useEffect(() => {
-    axios
-      .get(`${url_api}/assistant/${articleID}`)
-      .then((response) => {
-        const assistantOpinion = response.data.assistant;
-        const {
-          transcript_pdf,
-          abstract_opinion,
-          category_opinion,
-          general_opinion,
-          specific_opinion,
-          final_eval,
-        } = assistantOpinion;
-        setTranscript(transcript_pdf ?? null);
-        setAbstract(abstract_opinion ?? null);
-        setCategory_opinion(category_opinion ?? null);
-        setGeneral_opinion(general_opinion ?? null);
-        setSpecific_opinion(specific_opinion ?? null);
-        setFinal_eval(final_eval ?? null);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  }, []);
+    if (articleID) {
+      setDataBaseArticleID(articleID);
+      axios
+        .get(`${url_api}/assistant/${articleID}`)
+        .then((response) => {
+          const assistantOpinion = response.data.assistant;
+          const {
+            transcript_pdf,
+            abstract_opinion,
+            category_opinion,
+            general_opinion,
+            specific_opinion,
+            final_eval,
+          } = assistantOpinion;
+          setTranscript(transcript_pdf ?? null);
+          setAbstract(abstract_opinion ?? null);
+          setCategory_opinion(category_opinion ?? null);
+          setGeneral_opinion(general_opinion ?? null);
+          setSpecific_opinion(specific_opinion ?? null);
+          setFinal_eval(final_eval ?? null);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    }
+  }, [articleID]);
 
   useEffect(() => {
     const counter =
@@ -52,14 +56,14 @@ export default function MainGPT() {
       abstract &&
       category_opinion &&
       general_opinion &&
-      specific_opinion &&
+      specific_opinion.length != 0 &&
       final_eval
         ? 6
         : transcript &&
           abstract &&
           category_opinion &&
           general_opinion &&
-          specific_opinion
+          specific_opinion.length != 0
         ? 5
         : transcript && abstract && category_opinion && general_opinion
         ? 4
@@ -85,6 +89,7 @@ export default function MainGPT() {
     const components = [];
 
     if (componentsRender >= 1) {
+      handleAssignFunction(false);
       components.push({
         component: ViewTranscript,
         propName: "transcript",
@@ -93,6 +98,7 @@ export default function MainGPT() {
     }
 
     if (componentsRender >= 2) {
+      handleAssignFunction(false);
       components.push({
         component: ViewAbstract,
         propName: "abstract",
@@ -101,6 +107,7 @@ export default function MainGPT() {
     }
 
     if (componentsRender >= 3) {
+      handleAssignFunction(true);
       components.push({
         component: ViewCategory,
         propName: "category",
@@ -109,6 +116,7 @@ export default function MainGPT() {
     }
 
     if (componentsRender >= 4) {
+      handleAssignFunction(true);
       components.push({
         component: ViewGeneralOpinion,
         propName: "generalOpinion",
@@ -117,6 +125,7 @@ export default function MainGPT() {
     }
 
     if (componentsRender >= 5) {
+      handleAssignFunction(true);
       components.push({
         component: ViewSpecificOpinion,
         propName: "specificOpinion",
@@ -125,6 +134,7 @@ export default function MainGPT() {
     }
 
     if (componentsRender >= 6) {
+      handleAssignFunction(true);
       components.push({
         component: ViewFinalEval,
         propName: "finalEval",
@@ -149,6 +159,8 @@ export default function MainGPT() {
             : componentsRender === 5
             ? "final_eval"
             : null,
+        propNameID: "1",
+        propValueID: "1",
       });
     }
 
@@ -162,8 +174,24 @@ export default function MainGPT() {
       </h3>
       {listOfComponents &&
         listOfComponents.map((item, index) => {
-          const { component: Component, propName, propValue } = item;
-          return <Component key={index} {...{ [propName]: propValue }} />;
+          const {
+            component: Component,
+            propName,
+            propValue,
+            propNameID,
+            propValueID,
+          } = item;
+          if (propNameID && propValueID) {
+            return (
+              <Component
+                key={index}
+                {...{ [propName]: propValue }}
+                articleID={dataBaseArticleID}
+              />
+            );
+          } else {
+            return <Component key={index} {...{ [propName]: propValue }} />;
+          }
         })}
     </div>
   );

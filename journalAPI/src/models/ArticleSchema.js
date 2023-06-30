@@ -34,7 +34,7 @@ const ArticleSchema = new Schema({
   },
   status: {
     type: String,
-    enum: ["wait_revisor", "wait_admin", "published", "reject"],
+    enum: ["wait_revisor", "partial_reject", "published", "reject"],
     default: "wait_revisor",
   },
   created_at: { type: Date, default: Date.now },

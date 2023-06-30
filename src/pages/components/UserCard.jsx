@@ -103,12 +103,7 @@ export default function UserCard({ id, name, lastname, email, role }) {
         />
       </ListItem>
       <Divider variant="inset" component="li" />
-      <Dialog
-        fullWidth={"xs"}
-        maxWidth={"xs"}
-        open={open}
-        onClose={handleClose}
-      >
+      <Dialog maxWidth={"xs"} open={open} onClose={handleClose}>
         <DialogTitle>Cambio de rol a {name + " " + lastname}</DialogTitle>
         <DialogContent>
           <DialogContentText>

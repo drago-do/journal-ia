@@ -34,7 +34,12 @@ export default function UserInfoButton() {
     <Link href={`/user`} className="userCard">
       <Stack direction="row" spacing={2}>
         <Avatar alt="UserProfile" src={userPicture} />
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+        <Typography
+          className="hidden md:block"
+          variant="h6"
+          component="div"
+          sx={{ flexGrow: 1 }}
+        >
           {Cookies.get("name")} {Cookies.get("lastname")}
         </Typography>
       </Stack>

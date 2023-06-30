@@ -24,13 +24,10 @@ function Header(props) {
           noWrap
           sx={{ flex: 1 }}
         >
-          <Link href={"/"} className="no-underline text-black">
+          <Link href={"/"} className="no-underline text-black hidden sm:block">
             {title}
           </Link>
         </Typography>
-        <IconButton>
-          <SearchIcon />
-        </IconButton>
         <UserLoginButton />
       </Toolbar>
     </React.Fragment>

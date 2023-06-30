@@ -33,9 +33,6 @@ export default function ViewTranscript({ transcript }) {
     }
   }, [transcript]);
 
-  useEffect(() => {
-    console.log(transcriptPerPage);
-  }, [transcriptPerPage]);
 
   return (
     <div>

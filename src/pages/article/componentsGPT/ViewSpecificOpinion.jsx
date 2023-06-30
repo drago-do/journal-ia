@@ -39,11 +39,14 @@ export default function ViewSpecificOpinion({ specificOpinion }) {
                     </Typography>
                   </AccordionSummary>
                   <AccordionDetails>
-                    <Typography>
+                    <Typography component={"div"}>
                       <TextFormated text={page[0]} />
                     </Typography>
-                    <Typography>
-                      <TextFormated className={"bg-lime-200 rounded-md p-4"} text={page[1]} />
+                    <Typography component={"div"}>
+                      <TextFormated
+                        className={"bg-lime-200 rounded-md p-4"}
+                        text={page[1]}
+                      />
                     </Typography>
                   </AccordionDetails>
                 </Accordion>
