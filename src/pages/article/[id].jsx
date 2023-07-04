@@ -50,6 +50,8 @@ export default function ArticlePage() {
   const [urlForNewComment, setUrlForNewComment] = useState(null);
 
   const [canAssignRevisor, setCanAssignRevisor] = useState(false);
+  const [canGenerateGeneralOpinion, setCanGenerateGeneralOpinion] =
+    useState(null);
 
   const handleAssignRevisor = (value) => {
     setCanAssignRevisor(value);
@@ -57,14 +59,27 @@ export default function ArticlePage() {
 
   useEffect(() => {
     // Obtener artículo
-    axios
-      .get(`${url_api}/article/${id}`)
-      .then((response) => {
-        setArticle(response.data);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    if (id) {
+      axios
+        .get(`${url_api}/article/${id}`)
+        .then((response) => {
+          setArticle(response.data);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+      //Verificar si el articulo ya fue revisado por los revisores
+      admin &&
+        axios
+          .get(`${url_api}/commentOfRevisor/check/${id}`)
+          .then((response) => {
+            setCanGenerateGeneralOpinion(response.data);
+            console.log(response);
+          })
+          .catch((err) => {
+            console.log(err);
+          });
+    }
     setAdmin(Cookies.get("role") === "admin" ? true : false);
     thisUserCanComment();
     thisUserCanViewStatusArticle();
@@ -217,6 +232,7 @@ export default function ArticlePage() {
               <MainGPT
                 articleID={article._id}
                 handleAssignFunction={handleAssignRevisor}
+                canGenerateGeneralOpinion={canGenerateGeneralOpinion}
               />
             </>
           )}

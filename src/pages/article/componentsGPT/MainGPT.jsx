@@ -7,11 +7,19 @@ import ViewGeneralOpinion from "./ViewGeneralOpinion";
 import ViewSpecificOpinion from "./ViewSpecificOpinion";
 import ViewFinalEval from "./ViewFinalEval";
 import GenerarGPT from "./GenerarGPT";
+import Alert from "@mui/material/Alert";
+import AlertTitle from "@mui/material/AlertTitle";
+import Stack from "@mui/material/Stack";
+import Image from "next/image";
 
 const url_api = process.env.API_URL;
 // const articleID = "64924afafe72da3bda4302ac";
 
-export default function MainGPT({ articleID, handleAssignFunction }) {
+export default function MainGPT({
+  articleID,
+  handleAssignFunction,
+  canGenerateGeneralOpinion,
+}) {
   const [dataBaseArticleID, setDataBaseArticleID] = useState(null);
   const [transcript, setTranscript] = useState(null);
   const [abstract, setAbstract] = useState(null);
@@ -21,6 +29,24 @@ export default function MainGPT({ articleID, handleAssignFunction }) {
   const [final_eval, setFinal_eval] = useState(null);
   const [componentsRender, setComponentsRender] = useState(0);
   const [listOfComponents, setListOfComponents] = useState(null);
+
+  const [availableGeneralOpinion, setAvailableGeneralOpinion] = useState(false);
+
+  const userCanGenerateGeneralOpinion = (object) => {
+    //Verify if "canGenerateGeneralOpinion" is an object
+    if (typeof object === "object") {
+      //Verify if "canGenerateGeneralOpinion" is not null
+      if (object) {
+        setAvailableGeneralOpinion(false);
+      }
+    } else {
+      setAvailableGeneralOpinion(true);
+    }
+  };
+  useEffect(() => {
+    canGenerateGeneralOpinion &&
+      userCanGenerateGeneralOpinion(canGenerateGeneralOpinion);
+  }, [canGenerateGeneralOpinion]);
 
   useEffect(() => {
     if (articleID) {
@@ -152,7 +178,7 @@ export default function MainGPT({ articleID, handleAssignFunction }) {
             ? "abstract_opinion"
             : componentsRender === 2
             ? "category_opinion"
-            : componentsRender === 3
+            : componentsRender === 3 && availableGeneralOpinion
             ? "general_opinion"
             : componentsRender === 4
             ? "specific_opinion"
@@ -162,6 +188,13 @@ export default function MainGPT({ articleID, handleAssignFunction }) {
         propNameID: "1",
         propValueID: "1",
       });
+      if (!availableGeneralOpinion) {
+        components.push({
+          component: RevisorOpinionsIncomplete,
+          propName: "usuarios",
+          propValue: canGenerateGeneralOpinion,
+        });
+      }
     }
 
     setListOfComponents(components);
@@ -196,5 +229,44 @@ export default function MainGPT({ articleID, handleAssignFunction }) {
     </div>
   );
 }
+
+const RevisorOpinionsIncomplete = ({ usuarios }) => {
+  return (
+    <>
+      {usuarios ? (
+        <Alert severity="info" className="mt-5">
+          <AlertTitle>
+            Falta que los siguientes <strong>usuarios</strong> añadan su
+            opinion:
+          </AlertTitle>
+          {usuarios.map((usuario, index) => {
+            return (
+              <div
+                key={index}
+                className="border-solid border-2 border-sky-200 p-2 rounded-md flex flex-row"
+              >
+                <Image
+                  src={"/assets/revisor.png"}
+                  alt="imagen revisor"
+                  width={40}
+                  height={40}
+                  className="mr-4"
+                />
+                <div>
+                  <p>{usuario.name + " " + usuario.lastname}</p>
+                  <p>{usuario.email}</p>
+                </div>
+              </div>
+            );
+          })}
+          <p className="italic font-thin	">
+            Es necesario que estos realicen sus comentarios antes de que la IA
+            analice el texto.
+          </p>
+        </Alert>
+      ) : null}
+    </>
+  );
+};
 
 //!----------------------------------------------------------------------------

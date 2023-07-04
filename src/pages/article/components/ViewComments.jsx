@@ -11,8 +11,8 @@ const url_api = process.env.API_URL;
 
 export default function ViewComments({ article, status }) {
   const [comments, setComments] = useState(null);
+  const [allCommentsReady, setAllCommentsReady] = useState(false);
   const [showComments, setShowComments] = useState(false);
-  const [commentsFiltered, setCommentsFiltered] = useState(null);
   const [userRole, setUserRole] = useState(Cookies.get("role"));
 
   const getCommentsOfArticle = (article) => {
@@ -20,6 +20,7 @@ export default function ViewComments({ article, status }) {
       .get(`${url_api}/commentOfRevisor/${article}`)
       .then((response) => {
         setComments(response.data);
+        setAllCommentsReady(true);
       })
       .catch((error) => {
         console.log(error);
@@ -40,7 +41,7 @@ export default function ViewComments({ article, status }) {
       const filtered = comments.filter((comment) => {
         return comment.id_user == idUser ? comment.id_user : null;
       });
-      setCommentsFiltered(filtered);
+      setComments(filtered);
     }
   };
 
@@ -51,36 +52,37 @@ export default function ViewComments({ article, status }) {
   useEffect(() => {
     status && userCanViewComments(status, userRole);
     showOnlyCommentsOfUser(comments);
-  }, [status, comments, userRole]);
+  }, [status, allCommentsReady, userRole]);
 
   return (
-    <div className="container shadow-md bg-slate-100 p-4">
+    <div
+      className={`container shadow-md bg-slate-100 p-4 ${
+        showComments ? "" : "hidden"
+      }`}
+    >
       <h6 className="font-sans text-lg font-semibold">
         Comentarios de revisores
       </h6>
-      {showComments && comments ? (
-        userRole === "admin" ? (
+      {showComments ? (
+        comments && comments.length > 0 ? (
           comments.map((comment, index) => {
-            return <Comments key={index} comment={comment} forAdmin={true} />;
-          })
-        ) : commentsFiltered && userRole === "author" ? (
-          comments.map((comment, index) => {
-            return <Comments key={index} comment={comment} forAdmin={false} />;
+            return (
+              <Comments
+                key={index}
+                comment={comment}
+                forAdmin={userRole === "admin" ? true : false}
+              />
+            );
           })
         ) : (
-          commentsFiltered &&
-          commentsFiltered.map((comment, index) => {
-            return <Comments key={index} comment={comment} forAdmin={false} />;
-          })
+          <div className="w-full flex flex-col justify-center items-center">
+            <h6 className="font-semibold text-lg">
+              Parece que aun no hay comentarios.
+            </h6>
+            <CommentsDisabledIcon />
+          </div>
         )
-      ) : (
-        <div className="w-full flex flex-col justify-center items-center">
-          <h6 className="font-semibold text-lg">
-            No es posible visualizar los comentarios
-          </h6>
-          <CommentsDisabledIcon />
-        </div>
-      )}
+      ) : null}
     </div>
   );
 }
