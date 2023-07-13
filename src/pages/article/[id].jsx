@@ -2,11 +2,9 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Button from "@mui/material/Button";
-import { Typography } from "@mui/material";
+import { Paper, Typography } from "@mui/material";
+import Container from "@mui/material";
 import * as React from "react";
-import Box from "@mui/material/Box";
-import ButtonGroup from "@mui/material/ButtonGroup";
-import PropTypes from "prop-types";
 import Avatar from "@mui/material/Avatar";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -24,6 +22,8 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import MainGPT from "./componentsGPT/MainGPT";
 import ViewComments from "./components/ViewComments";
 import Link from "next/link";
+import PDFForm from "./new/PDFForm";
+
 import {
   getCategoryColor,
   getStatusColor,
@@ -43,11 +43,16 @@ export default function ArticlePage() {
   const { id } = router.query; // Accede al valor del parámetro dinámico
 
   const [article, setArticle] = useState(null);
+  const [articleStatus, setArticleStatus] = useState(null);
+  const [secondRevision, setSecondRevision] = useState(null);
   const [admin, setAdmin] = useState(false);
   const [canComment, setCanComment] = useState(false);
   const [canViewStatus, setCanViewStatus] = useState(false);
   const [authorName, setAuthorName] = useState("");
   const [urlForNewComment, setUrlForNewComment] = useState(null);
+  const [adminCanComment, setAdminCanComment] = useState(false);
+  const [iAmTheAuthor, setIAmTheAuthor] = useState(null);
+  const [userID, setUserID] = useState(Cookies.get("id_user"));
 
   const [canAssignRevisor, setCanAssignRevisor] = useState(false);
   const [canGenerateGeneralOpinion, setCanGenerateGeneralOpinion] =
@@ -57,13 +62,20 @@ export default function ArticlePage() {
     setCanAssignRevisor(value);
   };
 
+  const handleAdminCanComment = (value) => {
+    setAdminCanComment(value);
+  };
+
   useEffect(() => {
+    setUserID(Cookies.get("id_user"));
     // Obtener artículo
     if (id) {
       axios
         .get(`${url_api}/article/${id}`)
         .then((response) => {
           setArticle(response.data);
+          setArticleStatus(response.data.status === "wait_revisor");
+          setSecondRevision(response.data.status === "partial_reject");
         })
         .catch((error) => {
           console.log(error);
@@ -74,7 +86,6 @@ export default function ArticlePage() {
           .get(`${url_api}/commentOfRevisor/check/${id}`)
           .then((response) => {
             setCanGenerateGeneralOpinion(response.data);
-            console.log(response);
           })
           .catch((err) => {
             console.log(err);
@@ -84,10 +95,14 @@ export default function ArticlePage() {
     thisUserCanComment();
     thisUserCanViewStatusArticle();
     setUrlForNewComment("/article/newComment/" + id);
-  }, [id]);
+  }, [id, admin, adminCanComment]);
 
   useEffect(() => {
     article && getNameOfAuthor(article.author);
+    article && userID && console.log(userID === article.author);
+    article && userID && console.log(userID + " -- " + article.author);
+
+    article && userID && setIAmTheAuthor(userID === article.author);
   }, [article]);
 
   function formatDate(dateString) {
@@ -116,7 +131,7 @@ export default function ArticlePage() {
           return false;
         });
     }
-    if (role === "admin") setCanComment(true);
+    if (role === "admin") setCanComment(adminCanComment);
     return false;
   };
 
@@ -128,6 +143,21 @@ export default function ArticlePage() {
       })
       .catch(() => alert("Error al obtener el nombre del autor"));
   }
+
+  //función que actualiza el estado del articulo actual a "wait_revision", después recarga la pagina
+  const handleWaitRevision = () => {
+    axios
+      .put(`${url_api}/article/change_status/${id}`, {
+        status: "wait_revisor",
+      })
+      .then(() => {
+        alert("El artículo ha sido enviado a revisión");
+        window.location.reload();
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
 
   const VisualArticleInfo = () => {
     return (
@@ -209,34 +239,56 @@ export default function ArticlePage() {
               justifyContent: "center",
             }}
           >
-            <a href={`${url_api}/pdf/article/${id}`} download>
-              <Button
-                variant="contained"
-                fullWidth
-                style={{ background: "#96141c" }}
-              >
-                Descargar PDF
-              </Button>
-            </a>
-            {admin && canAssignRevisor && <AssignArticles article={article} />}
+            {!secondRevision && (
+              <a href={`${url_api}/pdf/article/${id}`} download>
+                <Button
+                  variant="contained"
+                  fullWidth
+                  style={{ background: "#96141c" }}
+                >
+                  Descargar PDF
+                </Button>
+              </a>
+            )}
+            {/* //TODO Agregar componente de subida de pdf nuevo */}
+            {secondRevision && iAmTheAuthor && (
+              <div className="p-3 border border-solid rounded-lg">
+                <div className="p-3 border border-solid border-blue-300 bg-blue-100 rounded-lg">
+                  <h6 className="text-xl">
+                    Parece que tu articulo requiere una segunda revision
+                  </h6>
+                  <p className="text-sm italic text-slate-700">
+                    La retroalimentación llego a tu correo, intenta corregirlo y
+                    sube tu PDF corregido aquí mismo.
+                  </p>
+                </div>
+                <PDFForm
+                  idArticle={article._id}
+                  isLoadingData={false}
+                  handleNext={handleWaitRevision}
+                />
+              </div>
+            )}
+            {admin && canAssignRevisor && articleStatus && (
+              <AssignArticles article={article} />
+            )}
           </div>
           <br />
           <br />
           <br />
-          {admin && article && (
+          {admin && article && articleStatus && (
             <>
-              <ChangeStatusArticle
-                actualStatus={article.status}
-                idArticle={article._id}
-              />
               <MainGPT
                 articleID={article._id}
                 handleAssignFunction={handleAssignRevisor}
+                handleAdminCanComment={handleAdminCanComment}
                 canGenerateGeneralOpinion={canGenerateGeneralOpinion}
               />
             </>
           )}
-          <ViewComments article={article._id} status={article.status} />
+          {articleStatus && (
+            <ViewComments article={article._id} status={article.status} />
+          )}
           {canComment && (
             <Button
               className="w-full mb-10 mt-2"
@@ -254,78 +306,6 @@ export default function ArticlePage() {
     </div>
   );
 }
-
-const ChangeStatusArticle = ({ actualStatus, idArticle }) => {
-  const [newStatus, setNewStatus] = useState(actualStatus);
-
-  const buttons = [
-    {
-      key: "wait_revisor",
-      label: "Esperando Revision",
-      background: "#1976D2",
-      color: "#fff",
-    },
-    {
-      key: "published",
-      label: "Publicar",
-      background: "#418944",
-      color: "#fff",
-    },
-    { key: "reject", label: "Rechazar", background: "#D74242", color: "#fff" },
-  ];
-
-  const handleStatusChange = (status) => {
-    // Lógica para enviar la actualización a través de Axios a la API
-    setNewStatus(status);
-    if (
-      !confirm(`¿Estás seguro que quieres cambiar el artículo
-    a estado "${status}"?`)
-    ) {
-      return;
-    }
-    axios
-      .put(`${url_api}/article/change_status/${idArticle}`, {
-        status,
-      })
-      .then((response) => {
-        //Reload page
-        window.location.reload();
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        "& > *": {
-          m: 1,
-        },
-      }}
-    >
-      <ButtonGroup size="small" aria-label="small button group">
-        {buttons.map((button) => (
-          <Button
-            key={button.key}
-            style={
-              button.key === actualStatus
-                ? { background: button.background, color: button.color }
-                : null
-            }
-            variant={button.key === actualStatus ? "contained" : "outlined"}
-            onClick={() => handleStatusChange(button.key)}
-          >
-            {button.label}
-          </Button>
-        ))}
-      </ButtonGroup>
-    </Box>
-  );
-};
 
 const AssignArticles = ({ article }) => {
   const [revisorUsers, setRevisorUsers] = useState();

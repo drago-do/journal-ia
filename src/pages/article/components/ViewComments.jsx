@@ -1,30 +1,32 @@
-import React from "react";
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import Cookies from "js-cookie";
 import axios from "axios";
 import Image from "next/image";
 import { Button } from "@mui/material";
 import CommentsDisabledIcon from "@mui/icons-material/CommentsDisabled";
+import { comment } from "postcss";
 
-//Definir variable de entorno
+// Definir variable de entorno
 const url_api = process.env.API_URL;
 
 export default function ViewComments({ article, status }) {
-  const [comments, setComments] = useState(null);
-  const [allCommentsReady, setAllCommentsReady] = useState(false);
+  const [comments, setComments] = useState([]);
   const [showComments, setShowComments] = useState(false);
   const [userRole, setUserRole] = useState(Cookies.get("role"));
+  const userID = Cookies.get("id_user");
 
   const getCommentsOfArticle = (article) => {
-    axios
-      .get(`${url_api}/commentOfRevisor/${article}`)
-      .then((response) => {
-        setComments(response.data);
-        setAllCommentsReady(true);
-      })
-      .catch((error) => {
-        console.log(error);
-      });
+    return new Promise((resolve) => {
+      axios
+        .get(`${url_api}/commentOfRevisor/${article}`)
+        .then((response) => {
+          setComments(response.data);
+          resolve(response.data);
+        })
+        .catch((error) => {
+          console.log(error);
+        });
+    });
   };
 
   const userCanViewComments = (status, userRole) => {
@@ -35,24 +37,24 @@ export default function ViewComments({ article, status }) {
     );
   };
 
-  const showOnlyCommentsOfUser = (comments) => {
-    const idUser = Cookies.get("id_user");
-    if (comments) {
-      const filtered = comments.filter((comment) => {
-        return comment.id_user == idUser ? comment.id_user : null;
-      });
-      setComments(filtered);
+  const filterCommentsByUser = () => {
+    if (userRole !== "admin") {
+      setComments(comments.filter((comment) => comment.id_user === userID));
     }
   };
 
   useEffect(() => {
-    article && getCommentsOfArticle(article);
+    if (article) {
+      getCommentsOfArticle(article).then((comments) => {
+        console.log(comments);
+        filterCommentsByUser();
+      });
+    }
   }, [article]);
 
   useEffect(() => {
-    status && userCanViewComments(status, userRole);
-    showOnlyCommentsOfUser(comments);
-  }, [status, allCommentsReady, userRole]);
+    userCanViewComments(status, userRole);
+  }, [status, userRole]);
 
   return (
     <div
@@ -64,20 +66,18 @@ export default function ViewComments({ article, status }) {
         Comentarios de revisores
       </h6>
       {showComments ? (
-        comments && comments.length > 0 ? (
-          comments.map((comment, index) => {
-            return (
-              <Comments
-                key={index}
-                comment={comment}
-                forAdmin={userRole === "admin" ? true : false}
-              />
-            );
-          })
+        comments.length > 0 ? (
+          comments.map((comment, index) => (
+            <Comments
+              key={index}
+              comment={comment}
+              forAdmin={userRole === "admin"}
+            />
+          ))
         ) : (
           <div className="w-full flex flex-col justify-center items-center">
             <h6 className="font-semibold text-lg">
-              Parece que aun no hay comentarios.
+              Parece que aún no hay comentarios.
             </h6>
             <CommentsDisabledIcon />
           </div>

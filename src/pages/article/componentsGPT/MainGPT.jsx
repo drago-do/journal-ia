@@ -19,6 +19,7 @@ export default function MainGPT({
   articleID,
   handleAssignFunction,
   canGenerateGeneralOpinion,
+  handleAdminCanComment,
 }) {
   const [dataBaseArticleID, setDataBaseArticleID] = useState(null);
   const [transcript, setTranscript] = useState(null);
@@ -37,10 +38,13 @@ export default function MainGPT({
     if (typeof object === "object") {
       //Verify if "canGenerateGeneralOpinion" is not null
       if (object) {
+        console.log("Main GPT" + object);
         setAvailableGeneralOpinion(false);
+        handleAdminCanComment(false);
       }
     } else {
       setAvailableGeneralOpinion(true);
+      handleAdminCanComment(true);
     }
   };
   useEffect(() => {

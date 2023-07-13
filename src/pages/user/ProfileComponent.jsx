@@ -48,14 +48,36 @@ export default function ProfileComponent() {
         allowScrollButtonsMobile
       >
         <Tab icon={<AccountCircleIcon />} label="Perfil" />
-        {(isAdmin || isRevisor) && (
-          <Tab icon={<DocumentScannerIcon />} label="Pendientes" />
-        )}
-        {isAdmin && <Tab icon={<ArticleIcon />} label="Publicados" />}
-        {isAdmin && <Tab icon={<ArticleIcon />} label="Rechazados" />}
-        {isAdmin && <Tab icon={<ArticleIcon />} label="Segunda" />}
-        {isAdmin && <Tab icon={<ManageAccountsIcon />} label="Usuarios" />}
-        {isAuthor && <Tab icon={<ArticleIcon />} label="Mis Artículos" />}{" "}
+        <Tab
+          style={{ display: isAdmin || isRevisor ? "flex" : "none" }}
+          icon={<DocumentScannerIcon />}
+          label="Pendientes"
+        />
+        <Tab
+          style={{ display: isAdmin ? "flex" : "none" }}
+          icon={<ArticleIcon />}
+          label="Publicados"
+        />
+        <Tab
+          style={{ display: isAdmin ? "flex" : "none" }}
+          icon={<ArticleIcon />}
+          label="Rechazados"
+        />
+        <Tab
+          style={{ display: isAdmin ? "flex" : "none" }}
+          icon={<ArticleIcon />}
+          label="Segunda"
+        />
+        <Tab
+          style={{ display: isAdmin ? "flex" : "none" }}
+          icon={<ManageAccountsIcon />}
+          label="Usuarios"
+        />
+        <Tab
+          style={{ display: isAuthor ? "flex" : "none" }}
+          icon={<ArticleIcon />}
+          label="Mis Artículos"
+        />
       </Tabs>
       <ShowView viewToShow={value} />
     </>

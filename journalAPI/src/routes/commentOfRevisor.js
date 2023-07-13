@@ -60,22 +60,12 @@ router.get("/check/:articleRef", async (req, res) => {
     const { articleRef } = req.params;
     //Obtiene todos los comentarios que existen del articulo
     const comments = await CommentOfRevisor.find({ article_ref: articleRef });
-    console.log("Comentarios: _____________________________________________");
-    console.log(comments);
     //Obtiene el id de los usuarios que han comentado
     const usersWithComment = comments.map((comment) => comment.id_user);
     //Obtiene todos los usuarios con el articulo asignado
     const users = await User.find({ assignArticles: articleRef });
-    console.log("Asignados: ________________________________________________");
-    console.log(users);
     //Obtiene el id de los usuarios que lo tienen asignado
     const usersWithArticle = users.map((user) => user._id);
-    console.log(
-      "ID Asignados: ________________________________________________"
-    );
-    console.log(usersWithArticle);
-    console.log("ID de los que comentaron: ________________________________");
-    console.log(usersWithComment);
     //Compara los usuarios que tienen el articulo asignado con los que han comentado
     const usersWithoutComment = usersWithArticle.filter(
       (user) =>
@@ -83,12 +73,6 @@ router.get("/check/:articleRef", async (req, res) => {
           (commentUserId) => commentUserId.toString() === user.toString()
         )
     );
-
-    console.log(
-      "ID  faltan por comentar: ________________________________________________"
-    );
-    console.log(usersWithoutComment);
-
     //Si no hay usuarios sin comentar, devuelve true
     if (usersWithoutComment.length === 0) {
       res.json(true);
