@@ -1,0 +1,31 @@
+{
+  "name": "journal-ia",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@emotion/react": "^11.11.1",
+    "@emotion/styled": "^11.11.0",
+    "@mui/icons-material": "^5.11.16",
+    "@mui/material": "^5.13.5",
+    "autoprefixer": "10.4.14",
+    "axios": "^1.3.6",
+    "busboy": "^1.6.0",
+    "eslint": "8.39.0",
+    "eslint-config-next": "13.3.1",
+    "js-cookie": "^3.0.5",
+    "markdown-to-jsx": "^7.2.0",
+    "mongoose": "^7.0.5",
+    "multer": "^1.4.5-lts.1",
+    "next": "13.3.1",
+    "postcss": "8.4.23",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "tailwindcss": "3.3.1"
+  }
+}

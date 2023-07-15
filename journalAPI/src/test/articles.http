@@ -1,0 +1,30 @@
+###
+POST http://localhost:3001/article HTTP/1.1
+Content-Type: application/json
+
+{
+  "title": "Análisis de seguridad en redes LPWAN para dispositivos IoT",
+  "abstract": "Este documento muestra el análisis realizado sobre la seguridad en las tecnologías LPWAN, centrando el estudio en las vulnerabilidades presentes en la tecnología Sigfox. La metodología usada se basa en la guía de desarrollo de pruebas presentada por OWASP, que consiste básicamente en la identificación de vulnerabilidades y recomendaciones de pruebas para validarlas. Adicional al uso de la metodología, se realizó una investigación documental sobre vulnerabilidades en las tecnologías LPWAN similares. Se desarrollaron pruebas prácticas basadas en recomendaciones de la industria para el uso seguro del IoT, estas fueron realizadas en un entorno de pruebas básico de comunicación de Sigfox usando la tarjeta Xkit RCZ4; se obtuvo como resultado vulnerabilidades en los dispositivos físicos, en el diseño de estos y en el Backend de Sigfox. Se realizó una comparación con las tecnologías LPWAN en el mercado y se analizó si Sigfox es realmente la red más segura en el campo del IoT como se vende en el mercado.",
+  "author": "64692706b73613ca060b7950",
+  "category": "Turismo"
+}
+
+###
+GET http://localhost:3001/article   HTTP/1.1
+
+
+###
+GET http://localhost:3001/article/6451c6109266427ccb15619a HTTP/1.1
+
+
+###
+PUT http://localhost:3001/article/6451c6439266427ccb1561a0 HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "alejo"
+}
+
+
+###
+DELETE  http://localhost:3001/article/6451c6439266427ccb1561a0  HTTP/1.1

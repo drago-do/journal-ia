@@ -1,0 +1,31 @@
+###
+POST http://localhost:3001/user HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "Fulanito",
+  "lastname": "Petronilo",
+  "email": "18030540@itesa.edu.mx",
+  "password": "admin",
+  "role":"user"
+}
+
+###
+GET http://localhost:3001/user   HTTP/1.1
+
+
+###
+GET http://localhost:3001/user/646914fad8058cf973b78750 HTTP/1.1
+
+
+###
+PUT http://localhost:3001/users/6451c6439266427ccb1561a0 HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "alejo"
+}
+
+
+###
+DELETE  http://localhost:3001/users/6451c6439266427ccb1561a0  HTTP/1.1
