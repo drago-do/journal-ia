@@ -210,10 +210,6 @@ export default function ArticlePage() {
           <br />
           {admin && article && (
             <>
-              <ChangeStatusArticle
-                actualStatus={article.status}
-                idArticle={article._id}
-              />
               <MainGPT
                 articleID={article._id}
                 handleAssignFunction={handleAssignRevisor}
@@ -238,78 +234,6 @@ export default function ArticlePage() {
     </div>
   );
 }
-
-const ChangeStatusArticle = ({ actualStatus, idArticle }) => {
-  const [newStatus, setNewStatus] = useState(actualStatus);
-
-  const buttons = [
-    {
-      key: "wait_revisor",
-      label: "Esperando Revision",
-      background: "#1976D2",
-      color: "#fff",
-    },
-    {
-      key: "published",
-      label: "Publicar",
-      background: "#418944",
-      color: "#fff",
-    },
-    { key: "reject", label: "Rechazar", background: "#D74242", color: "#fff" },
-  ];
-
-  const handleStatusChange = (status) => {
-    // Lógica para enviar la actualización a través de Axios a la API
-    setNewStatus(status);
-    if (
-      !confirm(`¿Estás seguro que quieres cambiar el artículo
-    a estado "${status}"?`)
-    ) {
-      return;
-    }
-    axios
-      .put(`${url_api}/article/change_status/${idArticle}`, {
-        status,
-      })
-      .then((response) => {
-        //Reload page
-        window.location.reload();
-      })
-      .catch((error) => {
-        console.log(error);
-      });
-  };
-
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        "& > *": {
-          m: 1,
-        },
-      }}
-    >
-      <ButtonGroup size="small" aria-label="small button group">
-        {buttons.map((button) => (
-          <Button
-            key={button.key}
-            style={
-              button.key === actualStatus
-                ? { background: button.background, color: button.color }
-                : null
-            }
-            variant={button.key === actualStatus ? "contained" : "outlined"}
-            onClick={() => handleStatusChange(button.key)}
-          >
-            {button.label}
-          </Button>
-        ))}
-      </ButtonGroup>
-    </Box>
-  );
-};
 
 const AssignArticles = ({ article }) => {
   const [revisorUsers, setRevisorUsers] = useState();

@@ -5,6 +5,7 @@ const multer = require("multer");
 const Article = require("../models/ArticleSchema");
 const PDF_File = require("../models/PdfSchema");
 const User = require("./../models/UserSchema");
+const { sendEmailForArticle } = require("./../util/email");
 
 //Create Article
 router.post("/", (req, res) => {
@@ -17,6 +18,13 @@ router.post("/", (req, res) => {
       res.json(data);
     })
     .catch((error) => res.json({ message: error }));
+});
+
+//Send retro of an article
+router.post("/review/:id", (req, res) => {
+  const { id } = req.params;
+  sendEmailForArticle(id);
+  res.sendStatus(200);
 });
 
 //Get all Articles's
@@ -121,10 +129,14 @@ router.delete("/article_pdf/:id", (req, res) => {
 });
 
 function deletePDFFile(id) {
-  //Eliminar todas las imagenes de la base de datos que coincidan con linkTo
+  //Eliminar todas las imágenes de la base de datos que coincidan con linkTo
   PDF_File.findOneAndDelete({ article_ref: id })
-    .then((data) => res.json(data))
-    .catch((error) => res.json({ message: error }));
+    .then((data) => {
+      return data;
+    })
+    .catch((error) => {
+      return error;
+    });
 }
 
 //ruta para agregar comentario de revisores
@@ -159,18 +171,6 @@ router.put("/add_comment/:idArticle", (req, res) => {
 router.put("/change_status/:idArticle", (req, res) => {
   const { idArticle } = req.params;
   const { status } = req.body;
-<<<<<<< HEAD
-  Article.findOneAndUpdate(
-    { _id: idArticle },
-    {
-      $set: {
-        status: status,
-      },
-    }
-  )
-    .then((data) => res.status(200).json(data))
-    .catch((error) => res.json({ message: error }));
-=======
   try {
     //Verifica si el estado del articulo es "partial_reject"
     if (status === "partial_reject") {
@@ -192,7 +192,14 @@ router.put("/change_status/:idArticle", (req, res) => {
   } catch (error) {
     res.json({ message: error });
   }
->>>>>>> c73e44f (Mejorada la interfaz principal)
+});
+
+//Para obtener el status de un articulo
+router.get("/get_status/:idArticle", (req, res) => {
+  const { idArticle } = req.params;
+  Article.find({ _id: idArticle })
+    .then((data) => res.status(200).json(data))
+    .catch((error) => res.json({ message: error }));
 });
 
 module.exports = router;

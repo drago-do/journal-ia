@@ -197,4 +197,3 @@ export default function MainGPT({ articleID, handleAssignFunction }) {
   );
 }
 
-//!----------------------------------------------------------------------------
