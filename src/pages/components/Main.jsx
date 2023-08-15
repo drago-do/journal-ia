@@ -19,9 +19,17 @@ const Feed = () => {
       allArticles = allArticles.filter(
         (article) => article.status === "published"
       );
+      //Reverse to all articles
+      allArticles = allArticles.reverse();
       setArticles(allArticles);
-      setFirstArticle(allArticles[0]); // Establecer el primer artículo como el "firstArticle"
-      setArticles((allArticles) => allArticles.slice(1)); // Eliminar el primer artículo de "articles"
+      console.log(allArticles);
+
+      // Crear una copia de la lista de artículos y eliminar el primer artículo
+      const remainingArticles = [...allArticles];
+      const firstArticle = remainingArticles.shift();
+
+      setFirstArticle(firstArticle); // Establecer el primer artículo como el "firstArticle"
+      setArticles(remainingArticles); // Actualizar la lista de artículos con los restantes
     });
   }, []);
 
